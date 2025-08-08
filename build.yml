@@ -1,0 +1,35 @@
+name: Android Build
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up JDK
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+        
+    - name: Setup Android
+      uses: android-actions/setup-android@v2
+      
+    - name: Build APK
+      run: |
+        # 生成临时local.properties
+        echo "sdk.dir=$ANDROID_HOME" > local.properties
+        
+        # 安装必要组件
+        sdkmanager "platform-tools" "platforms;android-31" "build-tools;31.0.0"
+        
+        # 执行Ant构建
+        ant debug
+        
+    - name: Upload APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: app-debug
+        path: bin/app-debug.apk
